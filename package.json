@@ -1,0 +1,26 @@
+{
+  "name": "scrabble",
+  "version": "1.0.0",
+  "main": "/htmlPages/login.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "export": "^0.1.337",
+    "express": "^4.16.2",
+    "jquery": "^3.2.1",
+    "restify": "^6.3.4",
+    "socket.io": "^2.0.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.11.0",
+    "@types/jquery": "^3.2.17",
+    "@types/restify": "^5.0.6",
+    "@types/socket.io": "^1.4.31",
+    "typescript": "^2.6.2"
+  },
+  "description": ""
+}

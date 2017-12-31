@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Scrabble Game-Menu</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        h1 {
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        h4 {
+            text-align: center;
+            color: white;
+        }
+
+        div {
+            text-align: center;
+        }
+
+        body {
+            background-color: rgb(39, 92, 9);
+        }
+    </style>
+</head>
+
+<body>
+    <img src="Scrabble-logo.png">
+    <h1 class="container">Game Menu</h1>
+    <h4 class="container">Choose between the options below</h4>
+    <div id = "divGreeting" style="color:white"></div>
+    <br></br>
+    <br></br>
+    <div>
+        <button id="btnSearchgame" type="button" class="btn" onclick="document.location.href = '/gamearea.html';">Play</button>
+        <br></br>
+        <button id="btnStats" type="button" class="btn" onclick="document.location.href = '/stats.html';">Stats</button>
+        <br></br>
+        <button id="btnLogout" type="button" class="btn" onclick="logout();">Log Out</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/client.js"></script>
+</body>
+
+</html>

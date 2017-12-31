@@ -1,0 +1,63 @@
+<!doctype html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Scrabble Login</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        h1 {
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        h4 {
+            text-align: center;
+            color: white;
+        }
+
+        div {
+            text-align: center;
+        }
+
+        body {
+            background-color: rgb(39, 92, 9);
+        }
+
+        strong {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="Scrabble-logo.png">
+    <h1 class="container">Login</h1>
+    <h4 class="container">Please login down below</h4>
+    <br></br>
+    <br></br>
+    <div>
+        <div class="container input-group col-xs-3">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+            <input id="loginTxtName" type="text" class="form-control" name="name" placeholder="Name">
+        </div>
+        <div class="container input-group col-xs-3">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+            <input id="loginTxtPassword" type="password" class="form-control" name="password" placeholder="Password">
+        </div>
+        <br></br>
+        <button id="btnLogin" type="button" class="btn" onclick="login();">Login</button> <strong>or</strong>
+        <button id="btnRegister" type="button" class="btn" onclick="document.location.href = '/register.html';">Register</button>
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/client.js"></script>
+</body>
+
+</html>
