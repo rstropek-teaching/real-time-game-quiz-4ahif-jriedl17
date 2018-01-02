@@ -15,18 +15,7 @@ class Tile {
         return "" + this.value;
     }
 }
-class Bag {
-    constructor() {
-        this.tiles = new Array();
-    }
-    setTile(tile) {
-        this.tiles.push(tile);
-    }
-    getTiles() {
-        return this.tiles;
-    }
-}
-class ScrabbleBag extends Bag {
+class ScrabbleBag {
     // 10 Pts.: X(1 time), Q(1 time)
     // 8 Pts.: J(1 time), Y(1 time), Z(1 time)
     // 4 Pts.: V(2 times), W(2 times)
@@ -34,7 +23,37 @@ class ScrabbleBag extends Bag {
     // 2 Pts.: L(3 times), G(3 times), D(4 times), Ö(1 time), Ä(1 time), Ü(1 time)
     // 1 Pts.: S(6 times), N(8 times), E(14 times), I(8 times), R(6 times), U(3 times); A(6 times), T(6 times), O(3 times)
     constructor() {
-        super();
+        this.tiles = new Array();
+        this.points = {
+            "A": 1,
+            "B": 3,
+            "C": 4,
+            "E": 1,
+            "F": 4,
+            "G": 2,
+            "H": 2,
+            "I": 1,
+            "J": 6,
+            "K": 2,
+            "L": 3,
+            "M": 3,
+            "N": 1,
+            "O": 2,
+            "P": 4,
+            "Q": 10,
+            "R": 1,
+            "S": 1,
+            "T": 1,
+            "U": 1,
+            "V": 6,
+            "W": 3,
+            "X": 8,
+            "Y": 10,
+            "Z": 3,
+            "Ä": 6,
+            "Ü": 6,
+            "Ö": 8
+        };
         //10 Points
         this.pushTile('X', 10, 1);
         this.pushTile('Q', 10, 1);
@@ -71,37 +90,70 @@ class ScrabbleBag extends Bag {
         this.pushTile('T', 1, 6);
         this.pushTile('O', 1, 3);
     }
+    setTile(tile) {
+        this.tiles.push(tile);
+    }
+    getTiles() {
+        return this.tiles;
+    }
+    getPoints() {
+        return this.points;
+    }
     pushTile(val, points, times) {
         for (let i = 0; i < times; i++) {
-            super.setTile(new Tile(val, points));
+            this.setTile(new Tile(val, points));
         }
     }
     getRandomTile() {
-        const random = Math.floor(Math.random() * (super.getTiles().length - 0) + 0);
-        return super.getTiles()[random];
+        const random = Math.floor(Math.random() * (this.getTiles().length - 0) + 0);
+        return this.getTiles()[random];
     }
     deleteTile(value) {
         const deleteTile = new Array();
         let deleted = false;
-        for (let i = 0; i < super.getTiles().length; i++) {
-            if (super.getTiles()[i].getValue() == value && !deleted) {
+        for (let i = 0; i < this.getTiles().length; i++) {
+            if (this.getTiles()[i].getValue() == value && !deleted) {
             }
             else {
-                deleteTile.push(super.getTiles()[i]);
+                deleteTile.push(this.getTiles()[i]);
                 deleted = true;
             }
         }
         return deleteTile;
     }
 }
-class UserBag extends Bag {
+class UserBag {
     constructor() {
-        super();
+        this.tiles = new Array();
+    }
+    setTile(tile) {
+        this.tiles.push(tile);
+    }
+    getTiles() {
+        return this.tiles;
     }
     getTile(index) {
-        return super.getTiles()[index];
+        return this.getTiles()[index];
     }
 }
+class Player {
+    constructor() {
+    }
+    getRandomStartTile() {
+        return this.randomStartTile;
+    }
+    setRandomStartTile(randTile) {
+        this.randomStartTile = randTile;
+    }
+    getUserName() {
+        return this.userName;
+    }
+    setUserName(usrName) {
+        this.userName = usrName;
+    }
+}
+let changeTile;
+let score;
 let userBag = new UserBag();
 let scrabbleBag = new ScrabbleBag();
 const socket = io();
@@ -121,7 +173,7 @@ function login() {
     let data = doPost(selector, "http://127.0.0.1:5984/scrabble/_find");
     if (data.docs[0] != undefined) {
         if ($('#loginTxtPassword').val() == data.docs[0].userPw) {
-            saveCurrentUserData(data);
+            saveThisUserData(data);
             document.location.href = "/gamemenu.html";
         }
         else {
@@ -202,13 +254,16 @@ function generateTable() {
 function safeBagitem(element) {
     sessionStorage.bagitem = element.textContent;
     sessionStorage.bagitemId = element.id;
+    if (changeTile) {
+        changeOneTile();
+    }
 }
 function placeBagItem(element) {
     if (element) {
         socket.emit('placedTile', element.id, sessionStorage.bagitem);
     }
 }
-function saveCurrentUserData(data) {
+function saveThisUserData(data) {
     sessionStorage.currentUserName = data.docs[0].userName;
     sessionStorage.currentUserGames = data.docs[0].games;
     sessionStorage.currentUserWon = data.docs[0].won;
@@ -219,6 +274,7 @@ function setValue(elmId, val) {
 }
 function gameStart() {
     generateTable();
+    sessionStorage.passCounter = "0";
     let tile;
     for (let i = 1; i < 8; i++) {
         tile = scrabbleBag.getRandomTile();
@@ -227,4 +283,79 @@ function gameStart() {
         $(id).text(tile.getValue());
         scrabbleBag.deleteTile(tile.getValue());
     }
+    socket.emit('gameStart', sessionStorage.currentUserName);
+}
+function game(player) {
+    alert("it's your turn! ;)");
+    enableButtons();
+}
+function pass() {
+    let passCounter = parseInt(sessionStorage.passCounter);
+    passCounter++;
+    sessionStorage.passCounter = passCounter;
+    console.log(sessionStorage.passCounter);
+    if (sessionStorage.passCounter == "2") {
+        socket.emit('gameEnd');
+    }
+    disableButtons();
+    socket.emit('changePlayer', sessionStorage.currentUserName);
+}
+function changeOneTile() {
+    let val = $('#' + sessionStorage.bagitemId).text();
+    console.log(val);
+    $('#' + sessionStorage.bagitemId).text(scrabbleBag.getRandomTile().getValue());
+    scrabbleBag.setTile(new Tile(val, scrabbleBag.getPoints().val));
+    sessionStorage.passCounter = "0";
+    disableButtons();
+}
+function changeAllTiles() {
+    let tile;
+    for (let i = 1; i < 8; i++) {
+        const id = '#bagItem' + i;
+        let val = $(id).text();
+        $(id).text(scrabbleBag.getRandomTile().getValue());
+        scrabbleBag.setTile(new Tile(val, scrabbleBag.getPoints().val));
+    }
+    sessionStorage.passCounter = "0";
+    disableButtons();
+}
+socket.on('randomTileAgain', function () {
+    doRandomTile();
+});
+function doRandomTile() {
+    let randomTile = scrabbleBag.getRandomTile().getValue();
+}
+function proofRandomTile() {
+    let a = ('A').charCodeAt(0);
+    if (sessionStorage.player1Tile.charCodeAt(0) - a < sessionStorage.player2Tile.charCodeAt(0)) {
+        return sessionStorage.player1Tile;
+    }
+    else if (sessionStorage.player1Tile.charCodeAt(0) - a > sessionStorage.player2Tile.getRandomStartTile().charCodeAt(0)) {
+        return sessionStorage.player2Tile;
+    }
+    else {
+        doRandomTile();
+    }
+    return "";
+}
+socket.on('gameStart', function (player) {
+    gameStart();
+    game(player);
+});
+socket.on('changePlayer', function (player) {
+    game(player);
+});
+socket.on('gameEnd', function () {
+    document.location.href = '/gamemenu.html';
+});
+function enableButtons() {
+    $('#btnPass').prop("disabled", false);
+    $('#btnChangeOneTile').prop("disabled", false);
+    $('#btnChangeAllTiles').prop("disabled", false);
+    $('#btnLayAWord').prop("disabled", false);
+}
+function disableButtons() {
+    $('#btnChangeOneTile').prop("disabled", true);
+    $('#btnChangeAllTiles').prop("disabled", true);
+    $('#btnLayAWord').prop("disabled", true);
 }
