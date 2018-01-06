@@ -28,6 +28,7 @@ class ScrabbleBag {
             "A": 1,
             "B": 3,
             "C": 4,
+            "D": 2,
             "E": 1,
             "F": 4,
             "G": 2,
@@ -119,6 +120,9 @@ class ScrabbleBag {
                 deleted = true;
             }
         }
+        /*if (scrabbleBag.getTiles.length == 0) {
+            socket.emit('gameEnd');
+        }*/
         return deleteTile;
     }
 }
@@ -152,17 +156,12 @@ class Player {
         this.userName = usrName;
     }
 }
-let changeTile;
-let score;
+const socket = io();
+let letterCounter = 0;
+let boolLayWord = false;
+let boolChangeOneTile = false;
 let userBag = new UserBag();
 let scrabbleBag = new ScrabbleBag();
-const socket = io();
-socket.on('greet', function (message) {
-    $("#divGreeting").text(sessionStorage.currentUserName + message);
-});
-socket.on('placedTile', function (elmId, val) {
-    setValue(elmId, val);
-});
 function login() {
     let selector = {
         "selector": {
@@ -230,6 +229,20 @@ function doPost(object, searchUrl) {
     });
     return returnData;
 }
+function doPut(object, searchUrl) {
+    let returnData;
+    $.ajax({
+        type: "PUT",
+        url: searchUrl,
+        contentType: "application/json",
+        data: JSON.stringify(object),
+        async: false,
+        success: function (data) {
+            returnData = data;
+        }
+    });
+    return returnData;
+}
 function logout() {
     document.location.href = "/login.html";
 }
@@ -241,10 +254,13 @@ function setStats() {
 }
 function generateTable() {
     let table = '<table>';
-    for (let i = 1; i < 16; i++) {
+    let id = 0;
+    for (let i = 0; i < 15; i++) {
         table += `<tr>`;
-        for (let j = 1; j < 16; j++) {
-            table += '<td><input type = "text" id = "' + i + '' + j + '" onclick="placeBagItem(document.getElementById(' + i + '' + j + '))" readonly></td>';
+        for (let j = 0; j < 15; j++) {
+            console.log("reihe " + i + ": " + id);
+            table += '<td><input type = "text" id = "' + id + '" onclick = "placeBagItem(document.getElementById(' + id + '))" readonly></td>';
+            id++;
         }
         table += `</tr>`;
     }
@@ -252,14 +268,27 @@ function generateTable() {
     $("#scrabbleboard").html(table);
 }
 function safeBagitem(element) {
-    sessionStorage.bagitem = element.textContent;
-    sessionStorage.bagitemId = element.id;
-    if (changeTile) {
+    if (boolLayWord) {
+        sessionStorage.bagitem = element.textContent;
+        sessionStorage.bagitemId = element.id;
+    }
+    if (boolChangeOneTile) {
+        sessionStorage.bagitem = element.textContent;
+        sessionStorage.bagitemId = element.id;
         changeOneTile();
     }
 }
 function placeBagItem(element) {
-    if (element) {
+    if (!boolChangeOneTile) {
+        if (sessionStorage.wordDirection != "" && sessionStorage.bagitem != "") {
+            if (letterCounter == 0) {
+                sessionStorage.firstLetterId = element.id;
+                console.log("Firstletter: " + sessionStorage.firstLetterId);
+            }
+            sessionStorage.letterId = element.id;
+            console.log("Letter: " + sessionStorage.letterId);
+            letterCounter++;
+        }
         socket.emit('placedTile', element.id, sessionStorage.bagitem);
     }
 }
@@ -274,7 +303,7 @@ function setValue(elmId, val) {
 }
 function gameStart() {
     generateTable();
-    sessionStorage.passCounter = "0";
+    setParametersToStart();
     let tile;
     for (let i = 1; i < 8; i++) {
         tile = scrabbleBag.getRandomTile();
@@ -291,20 +320,19 @@ function game(player) {
 }
 function pass() {
     let passCounter = parseInt(sessionStorage.passCounter);
+    if (passCounter >= 2) {
+        socket.emit('gameEnd', sessionStorage.score);
+    }
     passCounter++;
     sessionStorage.passCounter = passCounter;
-    console.log(sessionStorage.passCounter);
-    if (sessionStorage.passCounter == "2") {
-        socket.emit('gameEnd');
-    }
     disableButtons();
     socket.emit('changePlayer', sessionStorage.currentUserName);
 }
 function changeOneTile() {
     let val = $('#' + sessionStorage.bagitemId).text();
-    console.log(val);
     $('#' + sessionStorage.bagitemId).text(scrabbleBag.getRandomTile().getValue());
     scrabbleBag.setTile(new Tile(val, scrabbleBag.getPoints().val));
+    boolChangeOneTile = false;
     sessionStorage.passCounter = "0";
     disableButtons();
 }
@@ -319,35 +347,70 @@ function changeAllTiles() {
     sessionStorage.passCounter = "0";
     disableButtons();
 }
-socket.on('randomTileAgain', function () {
-    doRandomTile();
-});
-function doRandomTile() {
-    let randomTile = scrabbleBag.getRandomTile().getValue();
+function proofWord() {
+    let firstLetterId = parseInt(sessionStorage.firstLetterId);
+    let word = "";
+    let counterid = firstLetterId;
+    //proof where the word was layed, and get the word
+    if (sessionStorage.wordDirection == 'h') {
+        let lastLetterId = getLastIndex(firstLetterId, "h");
+        while (counterid < lastLetterId) {
+            word += $('#' + counterid).val();
+            counterid += 15;
+        }
+    }
+    else if (sessionStorage.wordDirection == 'v') {
+        let lastLetterId = getLastIndex(firstLetterId, "v");
+        while (counterid < lastLetterId) {
+            word += $('#' + counterid).val();
+            counterid += 1;
+        }
+    }
+    //proof if the word really exists
+    //calculate the points of the word
+    let score = 0;
+    for (let i = 0; i < word.length; i++) {
+        let letter = word.charAt(i);
+        score += scrabbleBag.getPoints()[letter];
+    }
+    score += parseInt(sessionStorage.score);
+    sessionStorage.score = score;
+    $('#lblScore').text(sessionStorage.score);
+    sessionStorage.passCounter = "0";
+    letterCounter = 0;
+    sessionStorage.wordDirection = "";
+    sessionStorage.bagitem = "";
+    sessionStorage.bagitemId = "";
+    boolLayWord = false;
+    disableButtons();
 }
-function proofRandomTile() {
-    let a = ('A').charCodeAt(0);
-    if (sessionStorage.player1Tile.charCodeAt(0) - a < sessionStorage.player2Tile.charCodeAt(0)) {
-        return sessionStorage.player1Tile;
+function getLastIndex(firstIndex, direction) {
+    let counterid = firstIndex;
+    let letter = " ";
+    if (direction == "h") {
+        while (letter != "" && letter != undefined) {
+            letter = $('#' + counterid).val();
+            counterid += 15;
+        }
+        counterid -= 15;
     }
-    else if (sessionStorage.player1Tile.charCodeAt(0) - a > sessionStorage.player2Tile.getRandomStartTile().charCodeAt(0)) {
-        return sessionStorage.player2Tile;
+    else if (direction == "v") {
+        while (letter != "" && letter != undefined) {
+            letter = $('#' + counterid).val();
+            counterid += 1;
+        }
+        counterid -= 1;
     }
-    else {
-        doRandomTile();
-    }
-    return "";
+    return counterid;
 }
-socket.on('gameStart', function (player) {
-    gameStart();
-    game(player);
-});
-socket.on('changePlayer', function (player) {
-    game(player);
-});
-socket.on('gameEnd', function () {
-    document.location.href = '/gamemenu.html';
-});
+function showDirectionButtons() {
+    let gameOptions = $('#gameOptions').html();
+    boolLayWord = true;
+    sessionStorage.word = "";
+    $("#btnHorizontal").show();
+    $("#btnVertical").show();
+    $("#btnFinished").show();
+}
 function enableButtons() {
     $('#btnPass').prop("disabled", false);
     $('#btnChangeOneTile').prop("disabled", false);
@@ -358,4 +421,64 @@ function disableButtons() {
     $('#btnChangeOneTile').prop("disabled", true);
     $('#btnChangeAllTiles').prop("disabled", true);
     $('#btnLayAWord').prop("disabled", true);
+    $("#btnHorizontal").hide();
+    $("#btnVertical").hide();
+    $("#btnFinished").hide();
+}
+function setParametersToStart() {
+    sessionStorage.passCounter = "0";
+    sessionStorage.bagitem = "";
+    sessionStorage.bagitemId = "";
+    sessionStorage.wordDirection = "";
+    sessionStorage.score = "0";
+}
+socket.on('greet', function (message) {
+    $("#divGreeting").text(sessionStorage.currentUserName + message);
+});
+socket.on('placedTile', function (elmId, val) {
+    setValue(elmId, val);
+    $('#' + sessionStorage.bagitemId).text(scrabbleBag.getRandomTile().getValue());
+});
+socket.on('gameStart', function (player) {
+    gameStart();
+    game(player);
+});
+socket.on('changePlayer', function (player) {
+    game(player);
+});
+socket.on('gameEnd', function (winnerscore) {
+    let selector = {
+        "selector": {
+            "userName": { "$eq": sessionStorage.currentUserName }
+        },
+        "fields": ["_id", "_rev", "userName", "userPw", "games", "lost", "won"]
+    };
+    let data = doPost(selector, "http://127.0.0.1:5984/scrabble/_find");
+    const gamesMade = data.docs[0].games + 1;
+    if (winnerscore.toString() == sessionStorage.score) {
+        const gamesWon = data.docs[0].won + 1;
+        const gamesLost = data.docs[0].lost;
+        updateUser(data, gamesMade, gamesWon, gamesLost);
+        document.location.href = "./winner.html";
+    }
+    else if (winnerscore.toString() !== sessionStorage.score) {
+        const gamesWon = data.docs[0].won;
+        const gamesLost = data.docs[0].lost + 1;
+        updateUser(data, gamesMade, gamesWon, gamesLost);
+        document.location.href = "./loser.html";
+    }
+});
+function updateUser(data, gamesMade, gamesWon, gamesLost) {
+    let updateUser = {
+        "_rev": data.docs[0]._rev,
+        "userName": data.docs[0].userName,
+        "userPw": data.docs[0].userPw,
+        "games": gamesMade,
+        "won": gamesWon,
+        "lost": gamesLost
+    };
+    sessionStorage.currentUserGames = gamesMade;
+    sessionStorage.currentUserWon = gamesWon;
+    sessionStorage.currentUserLost = gamesLost;
+    doPut(updateUser, "http://127.0.0.1:5984/scrabble/" + data.docs[0]._id);
 }

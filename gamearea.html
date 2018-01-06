@@ -29,6 +29,15 @@
             text-align: center;
         }
 
+        div.fixed {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 300px;
+            font-size: 15pt;
+            color: white;
+        }
+
         body {
             background-color: rgb(39, 92, 9);
         }
@@ -71,19 +80,26 @@
     <div id="scrabbleboard"></div>
     <br></br>
     <div id="bag">
-        <span id="bagItem1" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem1'))"></span>
-        <span id="bagItem2" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem2'))"></span>
-        <span id="bagItem3" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem3'))"></span>
-        <span id="bagItem4" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem4'))"></span>
-        <span id="bagItem5" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem5'))"></span>
-        <span id="bagItem6" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem6'))"></span>
-        <span id="bagItem7" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem7'))"></span>
+        <span id="bagItem1" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem1'));"></span>
+        <span id="bagItem2" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem2'));"></span>
+        <span id="bagItem3" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem3'));"></span>
+        <span id="bagItem4" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem4'));"> </span>
+        <span id="bagItem5" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem5'));"></span>
+        <span id="bagItem6" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem6'));"></span>
+        <span id="bagItem7" class="bagitem" onclick="safeBagitem(document.getElementById('bagItem7'));"></span>
     </div>
     <div id="gameOptions">
-        <button id="btnPass" onclick="pass();" disabled = "true">Pass</button>
-        <button id="btnChangeOneTile" onclick="changeTile = true;" disabled = "true">Change one Tile</button>
-        <button id="btnChangeAllTiles" onclick = "changeAllTiles();" disabled = "true">Change all Tiles</button>
-        <button id="btnLayAWord" disabled = "true">Lay a word</button>
+        <button id="btnPass" onclick="pass();" disabled="true">Pass</button>
+        <button id="btnChangeOneTile" onclick="boolChangeOneTile = true;" disabled="true">Change one Tile</button>
+        <button id="btnChangeAllTiles" onclick="changeAllTiles();" disabled="true">Change all Tiles</button>
+        <button id="btnLayAWord" onclick="showDirectionButtons();" disabled="true">Lay a word</button>
+        <button id='btnHorizontal' onclick='sessionStorage.wordDirection = "h";' hidden="hidden">Horizontal</button>
+        <button id='btnVertical' onclick='sessionStorage.wordDirection = "v";' hidden="hidden">Vertical</button>
+        <button id='btnFinished' onclick='proofWord();' hidden="hidden">Finished</button>
+    </div>
+    <div class = "fixed">
+        <label>Score: </label>
+        <label id="lblScore"></label>
     </div>
 </body>
 

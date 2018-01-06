@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Scrabble Register</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        h1 {
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        h4 {
+            text-align: center;
+            color: white;
+        }
+
+        div {
+            text-align: center;
+        }
+
+        body {
+            background-color: rgb(39, 92, 9);
+        }
+
+        strong {
+            color: white;
+        }
+
+        table {
+            width: 30%;
+            border: 5px solid black;
+        }
+
+        th {
+            color: white;
+            text-align: center;
+            width: 30%;
+            font-size: "20";
+            border: 2px solid black;
+        }
+
+        td {
+            color: white;
+            text-align: center;
+            width: 20%;
+            border: 2px solid black;
+        }
+    </style>
+</head>
+
+<body onload="setStats();">
+    <img src="Scrabble-logo.png">
+    <h1 class="container">Congratulations, you have won!</h1>
+    <div>
+        <button onclick="document.location.href = './gamemenu.html'">Back to Game Menu</button>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+
+</html>
